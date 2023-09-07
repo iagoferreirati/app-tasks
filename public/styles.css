@@ -1,0 +1,16 @@
+/* Estilos para tarefas concluídas */
+.completed-task {
+    color: green;
+    text-decoration: line-through;
+  }
+  
+/* Estilos para os botões e tarefas */
+li {
+display: flex; /* Flex container para alinhar itens verticalmente */
+align-items: center; /* Alinha itens verticalmente no centro */
+margin-bottom: 10px; /* Adiciona espaçamento entre as tarefas */
+}
+
+li button {
+margin-right: 10px; /* Adiciona espaçamento entre o botão e a tarefa */
+}

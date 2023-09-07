@@ -1,0 +1,35 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      MONGODB_HOST: mongodb
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: localhost:56065
+      NODE_OPTIONS: "--require @opentelemetry/auto-instrumentations-node/register"
+
+    ports:
+      - '3000:3000'
+    networks:
+      - app  
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo
+    ports:
+      - '27017:27017'
+    networks:
+      - app        
+    container_name: mongodb
+    volumes:
+      - mongodb_data:/data/db    
+
+networks:
+  app:
+    driver: bridge
+
+
+volumes:
+  mongodb_data:

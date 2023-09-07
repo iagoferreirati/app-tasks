@@ -1,0 +1,17 @@
+{
+    "name": "task-list-app",
+    "version": "1.0.0",
+    "description": "Simple task list app built with Node.js",
+    "main": "app.js",
+    "scripts": {
+      "start": "node app.js"
+    },
+    "dependencies": {
+      "express": "^4.17.1",
+      "mongoose": "^7.5.0",
+      "dotenv": "^10.0.0"
+      
+    }
+  }
+  
+  

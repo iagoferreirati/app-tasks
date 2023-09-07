@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-task
+  namespace: app-task  
+spec:
+  selector:
+    matchLabels:
+      app: app-task
+  template:
+    metadata:
+      namespace: app-task  
+      labels:
+        app: app-task    
+    spec:
+      containers:
+      - name: app-task 
+        image: iagomauricio/app-tasks:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "128m"
+        ports:
+            - name: app-task
+              containerPort: 3000
+              protocol: TCP
+        env:
+          - name: MONGODB_HOST
+            value: "mongo.app-task.svc.cluster.local"
+          - name: OTEL_TRACES_EXPORTER
+            value: "otlp"
+          - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+            value: "collector.opentelemetry.svc.cluster.local"
+          - name: NODE_OPTIONS
+            value: "--require @opentelemetry/auto-instrumentations-node/register"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+  namespace: app-task  
+spec:
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      namespace: app-task  
+      labels:
+        app: mongo    
+    spec:
+      subdomain: mongo-domain
+      containers:
+      - name: mongo
+        image: mongo
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "128m"
+        ports:
+            - name: app-task
+              containerPort: 27017
+              protocol: TCP
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: app-task
+  name: mongo
+spec:
+  selector:
+    app: mongo
+  ports:
+    - name: app-task
+      port: 27017
+      targetPort: 27017          
+  type: ClusterIP
