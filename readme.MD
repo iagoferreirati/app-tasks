@@ -22,7 +22,7 @@ Certifique-se de ter o Docker instalado em sua máquina antes de prosseguir.
 
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-usuario/lista-de-tarefas.git
+git clone https://github.com/iagoferreirati/app-tasks.git
 
 # Navegue até o diretório do projeto
 cd lista-de-tarefas
