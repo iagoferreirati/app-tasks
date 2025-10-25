@@ -1,40 +1,78 @@
-# Lista de Tarefas Web App
+# App Tasks - Frontend e Backend Separados
 
-Este é um aplicativo web de lista de tarefas que permite aos usuários adicionar, atualizar e excluir tarefas. O aplicativo foi desenvolvido usando Node.js, Express e MongoDB.
+Este projeto foi refatorado para usar uma arquitetura de microserviços com frontend e backend em containers separados.
 
-# Endpoints da API
-A API do aplicativo oferece os seguintes endpoints:
+## Estrutura do Projeto
 
-- **GET /tasks**: Retorna a lista de tarefas existentes.
-- **POST /tasks**: Adiciona uma nova tarefa à lista.
-- **POST /tasks/:id/status**: Atualiza o status de uma tarefa.
-- **DELETE /tasks/:id**: Exclui uma tarefa da lista.
+```
+app-tasks/
+├── frontend/           # Container do Frontend (Nginx)
+│   ├── Dockerfile
+│   └── public/
+│       ├── index.html
+│       └── styles.css
+├── backend/            # Container do Backend (Node.js)
+│   ├── Dockerfile
+│   ├── app.js
+│   └── package.json
+├── docker-compose.yml
+└── readme.MD
+```
 
+## Serviços
+
+### Frontend (Porta 3000)
+- **Tecnologia**: Nginx servindo arquivos estáticos
+- **Porta**: 3000 (mapeada para 80 do container)
+- **Arquivos**: HTML, CSS e JavaScript
+
+### Backend (Porta 3001)
+- **Tecnologia**: Node.js + Express
+- **Porta**: 3001
+- **Funcionalidades**: API REST para gerenciar tarefas
+- **Endpoints**:
+  - `GET /tasks` - Listar todas as tarefas
+  - `POST /tasks` - Criar nova tarefa
+  - `POST /tasks/:id/status` - Atualizar status da tarefa
+  - `DELETE /tasks/:id` - Excluir tarefa
+
+### MongoDB (Porta 27017)
+- **Tecnologia**: MongoDB
+- **Porta**: 27017
+- **Persistência**: Volume Docker para dados
+
+## Como Executar
+
+1. **Subir todos os serviços**:
+   ```bash
+   docker-compose up --build
+   ```
+
+2. **Acessar a aplicação**:
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:3001
+   - MongoDB: localhost:27017
+
+3. **Parar os serviços**:
+   ```bash
+   docker-compose down
+   ```
+
+## Vantagens da Separação
+
+- **Escalabilidade**: Cada serviço pode ser escalado independentemente
+- **Manutenção**: Mudanças no frontend não afetam o backend e vice-versa
+- **Tecnologias**: Cada serviço pode usar a tecnologia mais adequada
+- **Deploy**: Possibilidade de fazer deploy separado de cada serviço
+- **Desenvolvimento**: Equipes podem trabalhar independentemente
+
+## Comunicação
+
+O frontend se comunica com o backend através de requisições HTTP para `http://localhost:3001`. O CORS está configurado no backend para permitir requisições do frontend.
 
 ## Requisitos
 
-Certifique-se de ter o Docker instalado em sua máquina antes de prosseguir.
-
-
-## Executando o Aplicativo com Docker
-
-1. Clone este repositório:
-
-```bash
-# Clone o repositório
-git clone https://github.com/iagoferreirati/app-tasks.git
-
-# Navegue até o diretório do projeto
-cd lista-de-tarefas
-
-# Crie um arquivo .env e defina as variáveis de ambiente
-echo "MONGODB_HOST=mongodb" > .env
-
-# Construa a imagem Docker para o aplicativo
-docker build -t lista-de-tarefas-app .
-
-# Inicie o aplicativo e o banco de dados MongoDB com Docker Compose
-docker-compose up
+Certifique-se de ter o Docker e Docker Compose instalados em sua máquina antes de prosseguir.
 
 ## Como Usar
 

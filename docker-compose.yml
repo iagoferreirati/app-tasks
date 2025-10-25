@@ -1,16 +1,26 @@
 services:
-  app:
+  frontend:
     build:
-      context: .
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - '3000:80'
+    networks:
+      - app
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
       dockerfile: Dockerfile
     environment:
       MONGODB_HOST: mongodb
       OTEL_TRACES_EXPORTER: otlp
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: localhost:56065
       NODE_OPTIONS: "--require @opentelemetry/auto-instrumentations-node/register"
-
     ports:
-      - '3000:3000'
+      - '3001:3001'
     networks:
       - app  
     depends_on:

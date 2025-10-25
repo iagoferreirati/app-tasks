@@ -1,5 +1,5 @@
 # Use a imagem oficial do Node.js como base
-FROM node:18
+FROM node:24
 
 # Diretório de trabalho no contêiner
 WORKDIR /usr/src/app
@@ -17,7 +17,7 @@ RUN npm install elastic-apm-node --save
 COPY . .
 
 # Expor a porta que o aplicativo está ouvindo
-EXPOSE 3000
+EXPOSE 3001
 
 # Comando para iniciar o aplicativo
 CMD ["node", "app.js"]

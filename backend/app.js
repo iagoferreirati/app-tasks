@@ -1,8 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const path = require('path');
+const cors = require('cors');
 require('dotenv').config();
-const port = 3000;
+const port = 3001;
 
 const app = express();
 
@@ -42,34 +42,18 @@ db.once('open', () => {
 // Definir o esquema da tarefa
 const taskSchema = new mongoose.Schema({
   task: String,
-  status: Boolean, // Coluna "status"
+  status: { 
+    type: String, 
+    enum: ['todo', 'doing', 'done'], 
+    default: 'todo' 
+  }
 });
 
 const Task = mongoose.model('Task', taskSchema);
 
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-
-async function toggleTaskStatus(taskId, currentStatus) {
-  const newStatus = !currentStatus; // Inverte o status
-  const response = await fetch(`/tasks/${taskId}/status`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ status: newStatus })
-  });
-
-  if (response.ok) {
-    console.log('Status da tarefa atualizado com sucesso.');
-    fetchTasks();
-  } else {
-    console.error('Erro ao atualizar status da tarefa.');
-  }
-}
 
 
 app.get('/tasks', async (req, res) => {
@@ -82,71 +66,45 @@ app.get('/tasks', async (req, res) => {
   }
 });
 
-app.get('/tasks/:id/status', async (req, res) => {
-  const taskId = req.params.id;
-
-  try {
-    const task = await Task.findById(taskId);
-    if (!task) {
-      return res.status(404).json({ message: 'Tarefa não encontrada' });
-    }
-
-    res.json({ completed: task.completed }); // Retorna apenas o status
-  } catch (error) {
-    console.error('Erro ao consultar status da tarefa:', error);
-    res.status(500).json({ message: 'Erro ao consultar status da tarefa' });
-  }
-});
 
 app.post('/tasks', async (req, res) => {
-  const task = new Task({ task: req.body.task });
+  const task = new Task({ 
+    task: req.body.task,
+    status: req.body.status || 'todo'
+  });
   try {
     await task.save();
-    res.status(201).json({ message: 'Tarefa adicionada com sucesso' });
+    res.status(201).json({ message: 'Tarefa adicionada com sucesso', task });
   } catch (error) {
     console.error('Erro ao adicionar tarefa:', error);
     res.status(500).json({ message: 'Erro ao adicionar tarefa' });
   }
 });
 
-app.post('/tasks/:id/status', async (req, res) => {
+app.put('/tasks/:id', async (req, res) => {
   const taskId = req.params.id;
-  const newStatus = req.body.status;
+  const { task, status } = req.body;
 
   try {
-    const task = await Task.findById(taskId);
-    if (!task) {
+    const updatedTask = await Task.findByIdAndUpdate(
+      taskId, 
+      { task, status }, 
+      { new: true }
+    );
+    
+    if (!updatedTask) {
       return res.status(404).json({ message: 'Tarefa não encontrada' });
     }
-
-    task.status = newStatus; // Atualiza o status da tarefa
-    await task.save();
-
-    res.json({ message: 'Status da tarefa atualizado com sucesso', task });
+    
+    res.json({ message: 'Tarefa atualizada com sucesso', task: updatedTask });
   } catch (error) {
-    console.error('Erro ao atualizar status da tarefa:', error);
-    res.status(500).json({ message: 'Erro ao atualizar status da tarefa' });
+    console.error('Erro ao atualizar tarefa:', error);
+    res.status(500).json({ message: 'Erro ao atualizar tarefa' });
   }
 });
 
 
 
-// Rota para atualizar o status de uma tarefa
-app.put('/tasks/:id', async (req, res) => {
-    const taskId = req.params.id;
-    const completed = req.body.completed;
-  
-    try {
-      const task = await Task.findByIdAndUpdate(taskId, { completed }, { new: true });
-      if (!task) {
-        return res.status(404).json({ message: 'Tarefa não encontrada' });
-      }
-      res.json({ message: 'Status da tarefa atualizado com sucesso', task });
-    } catch (error) {
-      console.error('Erro ao atualizar status da tarefa:', error);
-      res.status(500).json({ message: 'Erro ao atualizar status da tarefa' });
-    }
-  });
 
   app.delete('/tasks/:id', async (req, res) => {
     const taskId = req.params.id;
